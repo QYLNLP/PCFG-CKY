@@ -14,49 +14,57 @@ import com.lc.nlp4han.constituent.PlainTextByTreeStream;
 import com.lc.nlp4han.constituent.TreeNode;
 import com.lc.nlp4han.ml.util.FileInputStreamFactory;
 
+
+
 public class ExtractGrammar {
 	  /*
 	   * 定义文法的变量
 	   */
 	private CFG cfg;
-	private PCFG pcfg;
+	private CFG pcfg;
 	private Set<String> nonTerSet;//非终结符集
 	private Set<String> terminalSet;//终结符集
 	private Map<RewriteRule,Integer> ruleCounter;//规则计数器
 	/*
-	 * 得到文法集,i为零时得到CFG,i为1时得到CNF
+	 * 得到文法集
 	 */
-	public CFG getGrammar(String fileName,String enCoding,int i) throws UnsupportedOperationException, FileNotFoundException, IOException {
-		  cfg=new CFG();
-		  ruleCounter=new HashMap<RewriteRule,Integer>();//重新定义规则计数器
-		  nonTerSet=cfg.getNonTerminalSet();
-	  	  terminalSet=cfg.getTerminalSet();
-	  	  //括号表达式树拼接成括号表达式String数组
-	  	  PlainTextByTreeStream ptbt=new PlainTextByTreeStream(new FileInputStreamFactory(new File(fileName)), enCoding);
+	public CFG getGrammar(String fileName,String enCoding,String type) throws UnsupportedOperationException, FileNotFoundException, IOException {
+		  //括号表达式树拼接成括号表达式String数组
+		  PlainTextByTreeStream ptbt=new PlainTextByTreeStream(new FileInputStreamFactory(new File(fileName)), enCoding);
 	  	  String bracketStr=ptbt.read();
 	      ArrayList<String> bracketStrList=new ArrayList<String>();
 	      //为了方便测试将其转换为动态数组
 	  	  while(bracketStr.length()!=0) {
+	  		System.out.println("括号表达式： "+bracketStr);
 	  		bracketStrList.add(bracketStr);
 	  		bracketStr=ptbt.read();
 	  	  }
-	  	  BracketStrToTree(bracketStrList,i);
 	  	  ptbt.close();
-	  	  return cfg;
+	  	  return bracketStrListConvertToGrammar(bracketStrList,type);
 	}
-	public void BracketStrToTree(ArrayList<String> bracketStrList,int i) throws IOException {
-	  	  for(String bracketStr:bracketStrList) {
+	//由括号表达式的list得到对应的文法集合
+	public CFG bracketStrListConvertToGrammar(ArrayList<String> bracketStrList,String type) throws IOException {
+		  cfg=new CFG();  
+   	      cfg.setType(type);
+		  ruleCounter=new HashMap<RewriteRule,Integer>();//重新定义规则计数器
+		  nonTerSet=cfg.getNonTerminalSet();
+	  	  terminalSet=cfg.getTerminalSet();
+		for(String bracketStr:bracketStrList) {
 	  		  TreeNode rootNode1=BracketExpUtil.generateTree(bracketStr);
-	  		  traverseTree(rootNode1,i);//遍历树，并在遍历的过程中将得到的树添加至map中
+	  		  traverseTree(rootNode1,type);//遍历树，并在遍历的过程中将得到的树添加至map中
 	  	  }
+	  	  if(type.contains("P")) {//转换为PCFG或者PCNF
+	  		return getPCFG(type); 
+	  	  }
+	  	 return cfg;
 	}
     /*
      * 遍历树得到CFG
      */
-    public void traverseTree(TreeNode node,int i) {
-      if(i==0) {
+    public void traverseTree(TreeNode node,String type) {
+      if(type.contains("CFG")) {
     	  traverseTreeGetCFG(node);
-      }else if(i==1) {
+      }else{
     	  traverseTreeGetCNF(node);
       }
   	  
@@ -172,11 +180,10 @@ public class ExtractGrammar {
 			  } 
     }
     /*
-     * 得到概率上下文无关文法,i为0时为PCFG，i为1时为PCNF
+     * 得到概率上下文无关文法,PCFG或者PCNF
      */
-    public PCFG getPCFG(String fileName,String enCoding,int i) throws UnsupportedOperationException, FileNotFoundException, IOException {
-    	pcfg=new PCFG();
-    	CFG cfg=getGrammar(fileName,enCoding,i);//得到CFG
+    public CFG getPCFG(String type) throws UnsupportedOperationException, FileNotFoundException, IOException {
+    	pcfg=new CFG();
     	Set<String> keySet=cfg.getRuleMapStartWithlhs().keySet();
     	for(String lhs:keySet) {
     		PRule pRule;
@@ -194,10 +201,11 @@ public class ExtractGrammar {
 /*    			System.out.println("概率规则  "+pRule);*/
     			if(pRule!=null)
     			{
-     			   pcfg.addPRule(pRule);
+     			   pcfg.add(pRule);
     			}
     		}
     	}
+    	pcfg.setType(cfg.getType());
     	pcfg.setStartSymbol(cfg.getStartSymbol());
     	pcfg.setNonTerminalSet(cfg.getNonTerminalSet());
     	pcfg.setTerminalSet(cfg.getTerminalSet());

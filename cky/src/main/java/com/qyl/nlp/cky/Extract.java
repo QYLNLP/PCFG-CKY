@@ -2,7 +2,8 @@ package com.qyl.nlp.cky;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Set;
+
+
 
 public class Extract {
 	 private String fileName;
@@ -13,17 +14,15 @@ public class Extract {
     	 this.enCoding=enCoding;
      }
      public CFG getCFG() throws UnsupportedOperationException, FileNotFoundException, IOException {
-        CFG cfg=eg.getGrammar(fileName, enCoding,0);
-		return cfg;
+        return eg.getGrammar(fileName, enCoding,"CFG");
      }
-     public PCFG getPCFG() throws UnsupportedOperationException, FileNotFoundException, IOException { 
-		return eg.getPCFG(fileName,enCoding,0); 
+     public CFG getPCFG() throws UnsupportedOperationException, FileNotFoundException, IOException { 
+		return eg.getGrammar(fileName,enCoding,"PCFG"); 
      }
      public CFG getCNF() throws UnsupportedOperationException, FileNotFoundException, IOException {
-    	 CFG cnf=eg.getGrammar(fileName, enCoding, 1);
-    	 return cnf; 
+    	 return eg.getGrammar(fileName, enCoding, "CNF");
      }
-     public PCFG getPCNF() throws UnsupportedOperationException, FileNotFoundException, IOException {    	 
-    	 return eg.getPCFG(fileName, enCoding, 1);
+     public CFG getPCNF() throws UnsupportedOperationException, FileNotFoundException, IOException {    	 
+    	 return eg.getGrammar(fileName, enCoding, "PCNF");
      }
 }

@@ -1,10 +1,7 @@
 package com.qyl.nlp.cky;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,55 +11,21 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+
+
 public class CKYTest {
     private ArrayList<String> sentences;
-    private String fileName;
-    private String enCoding;
-    private Extract extract;
-    private PrintWriter out;
+    private ExtractGrammar extractGrammar;
     private Set<RewriteRule> ruleSet;
-    private Set<PRule> pRuleSet;
     @Before
     public void BeforeTest() throws FileNotFoundException {
-    	out=new PrintWriter("E:\\ExtractTest\\text.txt");
+    	extractGrammar=new ExtractGrammar();
     	sentences=new ArrayList<String>();
-    	sentences.add("(ROOT\r\n" + 
-    			"  (IP\r\n" + 
-    			"    (NP\r\n" + 
-    			"      (NP (NR 中国))\r\n" + 
-    			"      (NP (NN 篮球) (NN 协会)))\r\n" + 
-    			"    (VP\r\n" + 
-    			"      (PP (P 在)\r\n" + 
-    			"        (NP\r\n" + 
-    			"          (NP (NR 北京市) (NR 通州区) (NR 张家湾镇))\r\n" + 
-    			"          (NP (NN 中心) (NN 小学))))\r\n" + 
-    			"      (VP (VV 举行) (AS 了)\r\n" + 
-    			"        (NP\r\n" + 
-    			"          (NP (NN 小篮球) (NN 发展) (NN 计划))\r\n" + 
-    			"          (CC 暨)\r\n" + 
-    			"          (NP (NN 小篮球) (NN 联赛) (NN 启动) (NN 仪式)))))\r\n" + 
-    			"    (PU 。)))  \r\n");
-    	sentences.add("(ROOT\r\n" + 
-    			"  (IP\r\n" + 
-    			"    (NP (NN 小篮球) (NN 规则) (NN 适用) (NN 对象))\r\n" + 
-    			"    (VP (VC 为))\r\n" + 
-    			"    (NP\r\n" + 
-    			"      (DNP\r\n" + 
-    			"        (QP (CD 12)\r\n" + 
-    			"            (CLP (M 岁))\r\n" + 
-    			"            (CC 及)\r\n" + 
-    			"            (NP (PN 以下)))\r\n" + 
-    			"        (DEG 的))\r\n" + 
-    			"      (NP (NN 少年) (NN 儿童)))\r\n" + 
-    			"    (PU 。)))\r\n");
-    	Iterator itr=sentences.iterator();
-    	while(itr.hasNext()) {
-        	out.print(itr.next());
-    	}
-    	out.close();
-    	fileName="E:\\ExtractTest\\text.txt";
-    	enCoding="UTF-8";
-    	extract=new Extract(fileName,enCoding);
+    	sentences.add("(ROOT(IP(NP(NP (NR 中国))(NP (NN 篮球) (NN 协会)))(VP(PP (P 在)(NP(NP (NR 北京市) (NR 通州区) (NR 张家湾镇))"
+    			+ "(NP (NN 中心) (NN 小学))))(VP (VV 举行) (AS 了)"
+    			+ "(NP(NP (NN 小篮球) (NN 发展) (NN 计划))(CC 暨)(NP (NN 小篮球) (NN 联赛) (NN 启动) (NN 仪式)))))(PU 。)))");
+    	sentences.add("(ROOT(IP(NP (NN 小篮球) (NN 规则) (NN 适用) (NN 对象))"
+    			+ "(VP (VC 为))(NP(DNP(QP (CD 12)(CLP (M 岁))(CC 及)(NP (PN 以下)))(DEG 的))(NP (NN 少年) (NN 儿童)))(PU 。)))");
     }
     
     @Test
@@ -94,8 +57,9 @@ public class CKYTest {
     	rules.add(new RewriteRule("NP","NN","NN","NN","NN"));
     	rules.add(new RewriteRule("NP","DNP","NP"));
     	rules.add(new RewriteRule("NP","PN"));
-    	CFG cfg=extract.getCFG();
+    	CFG cfg=extractGrammar.bracketStrListConvertToGrammar(sentences, "CFG");
     	ruleSet=cfg.getRuleBylhs("NP");//有规则左侧得到所有对应的规则
+    	Assert.assertEquals("CFG",cfg.getType());
     	Assert.assertTrue(ruleSet.containsAll(rules)&&rules.containsAll(ruleSet));
     	Assert.assertEquals(startSymbol,cfg.getStartSymbol());
     	Assert.assertEquals(nonTerminal, cfg.getNonTerminalSet());
@@ -103,7 +67,7 @@ public class CKYTest {
     }
     @Test
     public void getCNFTest() throws UnsupportedOperationException, FileNotFoundException, IOException {
-    	CFG cnf=extract.getCNF();
+    	CFG cnf=extractGrammar.bracketStrListConvertToGrammar(sentences, "CNF");
     	
     	Set<RewriteRule> rules=new HashSet<RewriteRule>();
     	//以由左侧得到所有规则右侧来进行测试
@@ -127,6 +91,7 @@ public class CKYTest {
     	RewriteRule ruleReduce=new RewriteRule("NN","中国");
     	RewriteRule ruleReduce1=new RewriteRule("NP","NN","NN","NN");
     	
+    	Assert.assertEquals("CNF",cnf.getType());
     	Assert.assertTrue(ruleSet.containsAll(rules)&&rules.containsAll(ruleSet));
     	Assert.assertTrue(cnf.getRuleSet().containsAll(rules1));
     	Assert.assertFalse(ruleSet.contains(ruleReduce1));
@@ -134,7 +99,7 @@ public class CKYTest {
     }
     @Test
     public void getPCFGTest() throws UnsupportedOperationException, FileNotFoundException, IOException {
-    	PCFG pcfg=extract.getPCFG();
+    	CFG pcfg=extractGrammar.bracketStrListConvertToGrammar(sentences, "PCFG");
     	Set<PRule> rules=new HashSet<PRule>();
     	rules.add(new PRule(0.25,"NR","中国"));
     	double pro=(double)3/17;
@@ -145,13 +110,14 @@ public class CKYTest {
     	rules.add(new PRule(pro2,"VP","PP","VP"));
     	rules.add(new PRule(1,"DNP","QP","DEG"));
     	
-    	Set<PRule> pRuleSet=pcfg.getPRuleSet();
-    	Assert.assertTrue(pcfg.getPRuleBylhs("NR").contains(new PRule((double)1/(double)4,"NR","中国")));
-    	Assert.assertTrue(pcfg.getPRuleSet().containsAll(rules));
+    	Set<RewriteRule> pRuleSet=pcfg.getRuleSet();
+        Assert.assertEquals("PCFG",pcfg.getType());
+    	Assert.assertTrue(pcfg.getRuleBylhs("NR").contains(new PRule((double)1/(double)4,"NR","中国")));
+    	Assert.assertTrue(pcfg.getRuleSet().containsAll(rules));
     }
     @Test
     public void getPCNFTest() throws UnsupportedOperationException, FileNotFoundException, IOException {
-    	PCFG pcnf=extract.getPCNF();
+    	CFG pcnf=extractGrammar.bracketStrListConvertToGrammar(sentences, "PCNF");;
     	Set<PRule> rules=new HashSet<PRule>();
     	double pro0=(double)2/12;
     	rules.add(new PRule(pro0,"NP","NP","NP"));
@@ -166,8 +132,13 @@ public class CKYTest {
      	rules1.add(new PRule(pro3,"VP","VVAS","NP"));
     	rules1.add(new PRule(1,"PP","P","NP"));
     	
-    	Set<PRule> rulesLHSIsNP=pcnf.getPRuleBylhs("NP");
+		Set<PRule> rulesLHSIsNP=pcnf.getRuleBylhs("NP");
+    	Iterator itr=rulesLHSIsNP.iterator();
+    	PRule prule=(PRule) itr.next();
+    	
+    	Assert.assertEquals("PCNF",pcnf.getType());
+    	Assert.assertTrue(prule.getProOfRule()>0);
     	Assert.assertTrue(rulesLHSIsNP.containsAll(rules));
-    	Assert.assertTrue(pcnf.getPRuleSet().containsAll(rules1));	
+    	Assert.assertTrue(pcnf.getRuleSet().containsAll(rules1));	
     }
     }

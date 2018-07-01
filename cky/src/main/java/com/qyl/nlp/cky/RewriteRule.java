@@ -2,7 +2,6 @@ package com.qyl.nlp.cky;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ArrayList;
 
 import com.lc.nlp4han.constituent.TreeNode;
 

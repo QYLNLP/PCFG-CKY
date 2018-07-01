@@ -10,19 +10,20 @@ import java.util.Vector;
  * 文法包含包含重写规则，非终结符集，终结符集
  */
 public class CFG {
+	private String type;
 	private String startSymbol;
 	private Set<String> nonTerminalSet=new HashSet<String>();//非终结符集
 	private Set<String> terminalSet=new HashSet<String>();//终结符集
-	private Set<RewriteRule> ruleSet=new HashSet<RewriteRule>();//规则集
-	private HashMap<String,HashSet<RewriteRule>> ruleMapStartWithlhs=new HashMap<String,HashSet<RewriteRule>>();//以左部为key值的规则集map
-    private HashMap<ArrayList<String>,HashSet<RewriteRule>> ruleMapStartWithrhs=
-    		     new HashMap<ArrayList<String>,HashSet<RewriteRule>>();//以规则右部为key值的规则集map
+	private Set ruleSet=new HashSet();//规则集
+	private HashMap<String,HashSet> ruleMapStartWithlhs=new HashMap<String,HashSet>();//以左部为key值的规则集map
+    private HashMap<ArrayList<String>,HashSet> ruleMapStartWithrhs=
+    		     new HashMap<ArrayList<String>,HashSet>();//以规则右部为key值的规则集map
 	/*
      * 构造函数,一步创建
      */
     public CFG(Set<String> nonTerminalSet, Set<String> terminalSet,
-			HashMap<String, HashSet<RewriteRule>> ruleMapStartWithlhs,
-			HashMap<ArrayList<String>,HashSet<RewriteRule>> ruleMapStartWithrhs) {
+			HashMap<String, HashSet> ruleMapStartWithlhs,
+			HashMap<ArrayList<String>,HashSet> ruleMapStartWithrhs) {
 		super();
 		this.nonTerminalSet = nonTerminalSet;
 		this.terminalSet = terminalSet;
@@ -36,7 +37,16 @@ public class CFG {
 	 * 通过一步一步添加rule来实现规则集，终结符/非终结符的更新
 	 */
 	public CFG() {
-		
+	}
+	
+	/*
+	 * 方法
+	 */
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 	public String getStartSymbol() {
 		return startSymbol;
@@ -56,16 +66,16 @@ public class CFG {
 	public void setTerminalSet(Set<String> terminalSet) {
 		this.terminalSet = terminalSet;
 	}
-	public HashMap<String, HashSet<RewriteRule>> getRuleMapStartWithlhs() {
+	public HashMap<String, HashSet> getRuleMapStartWithlhs() {
 			return ruleMapStartWithlhs;
 		}
-	public void setRuleMapStartWithlhs(HashMap<String, HashSet<RewriteRule>> ruleMapStartWithlhs) {
+	public void setRuleMapStartWithlhs(HashMap<String, HashSet> ruleMapStartWithlhs) {
 			this.ruleMapStartWithlhs = ruleMapStartWithlhs;
 		}
-	public HashMap<ArrayList<String>,HashSet<RewriteRule>> getRuleMapStartWithrhs() {
+	public HashMap<ArrayList<String>,HashSet> getRuleMapStartWithrhs() {
 			return ruleMapStartWithrhs;
 		}
-	public void setRuleMapStartWithrhs(HashMap<ArrayList<String>,HashSet<RewriteRule>> ruleMapStartWithrhs) {
+	public void setRuleMapStartWithrhs(HashMap<ArrayList<String>,HashSet> ruleMapStartWithrhs) {
 			this.ruleMapStartWithrhs = ruleMapStartWithrhs;
 		}
 		/*
@@ -78,14 +88,14 @@ public class CFG {
 			  ruleMapStartWithlhs.get(rule.getLhs()).add(rule);
 		  }  
   	  }else {
-		 HashSet<RewriteRule> set=new HashSet<RewriteRule>();
+		 HashSet set=new HashSet();
 		 set.add(rule);
 		 ruleMapStartWithlhs.put(rule.getLhs(),set);
   	  }
 	  if(ruleMapStartWithrhs.keySet().contains(rule.getRhs())) {
 		  ruleMapStartWithrhs.get(rule.getRhs()).add(rule); 
 	  }else {
-		  HashSet<RewriteRule> set=new  HashSet<RewriteRule>();
+		  HashSet set=new  HashSet();
 		  set.add(rule);
 		  ruleMapStartWithrhs.put(rule.getRhs(), set);
 	  }
@@ -93,7 +103,7 @@ public class CFG {
 	/*
 	 * 得到规则集
 	 */
-	public Set<RewriteRule> getRuleSet() {
+	public Set getRuleSet() {
 		return ruleSet;
 	}
 	/*
@@ -109,13 +119,13 @@ public class CFG {
 	/*
 	 * 根据规则左部得到所有对应规则
 	 */
-	public Set<RewriteRule> getRuleBylhs(String lhs){
+	public Set getRuleBylhs(String lhs){
 		return ruleMapStartWithlhs.get(lhs);	
 	}
 	/*
 	 * 根据规则右部得到所有对应规则
 	 */
-	public Set<RewriteRule> getRuleByrhs(String ...args){
+	public Set getRuleByrhs(String ...args){
 		Vector<String> rhsVector=new Vector<String>();
 		for(String string : args) {
 			rhsVector.add(string);
@@ -154,7 +164,7 @@ public class CFG {
 		stb.append("规则集： "+'\n');
 		Set<String> set=ruleMapStartWithlhs.keySet();
 		for(String string : set) {
-			HashSet<RewriteRule> ruleSet=ruleMapStartWithlhs.get(string);
+			HashSet ruleSet=ruleMapStartWithlhs.get(string);
 			Iterator itr3=ruleSet.iterator();
 			while(itr3.hasNext()) {
 				stb.append(itr3.next()+" ");
