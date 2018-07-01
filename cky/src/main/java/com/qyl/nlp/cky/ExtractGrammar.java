@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 import com.lc.nlp4han.constituent.BracketExpUtil;
+import com.lc.nlp4han.constituent.PlainTextByTreeStream;
 import com.lc.nlp4han.constituent.TreeNode;
 import com.lc.nlp4han.ml.util.FileInputStreamFactory;
-import com.lc.nlp4han.srl.PlainTextByTreeStream;
 
 public class ExtractGrammar {
 	  /*
@@ -33,14 +33,22 @@ public class ExtractGrammar {
 	  	  terminalSet=cfg.getTerminalSet();
 	  	  //括号表达式树拼接成括号表达式String数组
 	  	  PlainTextByTreeStream ptbt=new PlainTextByTreeStream(new FileInputStreamFactory(new File(fileName)), enCoding);
-	  	  String[] bracketStr=ptbt.read();
-	  	  while(bracketStr[0]!=null) {
-	  		  TreeNode rootNode1=BracketExpUtil.generateTree(bracketStr[0]);
-	  		  traverseTree(rootNode1,i);//遍历树，并在遍历的过程中将得到的树添加至map中
-	  		  bracketStr=ptbt.read();//读下一棵树
+	  	  String bracketStr=ptbt.read();
+	      ArrayList<String> bracketStrList=new ArrayList<String>();
+	      //为了方便测试将其转换为动态数组
+	  	  while(bracketStr.length()!=0) {
+	  		bracketStrList.add(bracketStr);
+	  		bracketStr=ptbt.read();
 	  	  }
+	  	  BracketStrToTree(bracketStrList,i);
 	  	  ptbt.close();
 	  	  return cfg;
+	}
+	public void BracketStrToTree(ArrayList<String> bracketStrList,int i) throws IOException {
+	  	  for(String bracketStr:bracketStrList) {
+	  		  TreeNode rootNode1=BracketExpUtil.generateTree(bracketStr);
+	  		  traverseTree(rootNode1,i);//遍历树，并在遍历的过程中将得到的树添加至map中
+	  	  }
 	}
     /*
      * 遍历树得到CFG

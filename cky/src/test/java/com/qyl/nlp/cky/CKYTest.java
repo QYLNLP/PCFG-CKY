@@ -41,8 +41,7 @@ public class CKYTest {
     			"          (NP (NN 小篮球) (NN 发展) (NN 计划))\r\n" + 
     			"          (CC 暨)\r\n" + 
     			"          (NP (NN 小篮球) (NN 联赛) (NN 启动) (NN 仪式)))))\r\n" + 
-    			"    (PU 。)))  \r\n" + 
-    			"中国篮球协会北京市通州区张家湾镇中心小学举行了小篮球发展计划暨小篮球联赛启动仪式  \r\n");
+    			"    (PU 。)))  \r\n");
     	sentences.add("(ROOT\r\n" + 
     			"  (IP\r\n" + 
     			"    (NP (NN 小篮球) (NN 规则) (NN 适用) (NN 对象))\r\n" + 
@@ -55,8 +54,7 @@ public class CKYTest {
     			"            (NP (PN 以下)))\r\n" + 
     			"        (DEG 的))\r\n" + 
     			"      (NP (NN 少年) (NN 儿童)))\r\n" + 
-    			"    (PU 。)))\r\n" + 
-    			"小篮球规则适用对象为12岁及以下的少年儿童");
+    			"    (PU 。)))\r\n");
     	Iterator itr=sentences.iterator();
     	while(itr.hasNext()) {
         	out.print(itr.next());

@@ -32,9 +32,11 @@ public class PCFG extends CFG{
 	public void setPRuleMapStartWithrhs(HashMap<ArrayList<String>, HashSet<PRule>> ruleMapStartWithrhs) {
 			this.pRuleMapStartWithrhs = ruleMapStartWithrhs;
 		}
-	/*
-	 * 添加单个规则
-	 */
+	
+	 /*
+	  * 添加单个规则
+	  */
+	 
    public void addPRule(PRule rule) {
 	   pRuleSet.add(rule);
 	   HashSet<PRule> lRuleSet=pRuleMapStartWithlhs.get(rule.getLhs());
@@ -57,20 +59,23 @@ public class PCFG extends CFG{
 	   } 
    }
 	/*
-	 * 得到规则集
+	 *  得到规则集
 	 */
+	 
 	public Set<PRule> getPRuleSet() {
 		return pRuleSet;
 	}
-   /*
-	 * 根据规则左部得到所有对应规则
-	 */
+    /*
+     *  根据规则左部得到所有对应规则
+     */ 
 	public Set<PRule> getPRuleBylhs(String lhs){
 		return pRuleMapStartWithlhs.get(lhs);	
 	}
 	/*
 	 * 根据规则右部得到所有对应规则
 	 */
+
+	 
 	public Set<PRule> getPRuleByrhs(String ...args){
 		Vector<String> rhsVector=new Vector<String>();
 		for(String string : args) {

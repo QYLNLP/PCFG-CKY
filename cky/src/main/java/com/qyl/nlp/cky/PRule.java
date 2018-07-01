@@ -1,6 +1,5 @@
 package com.qyl.nlp.cky;
 
-import java.util.ArrayList;
 
 
 public class PRule extends RewriteRule {
