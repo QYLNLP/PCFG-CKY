@@ -5,26 +5,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Vector;
 /*
  * 文法包含包含重写规则，非终结符集，终结符集
  */
 public class CFG {
-	private String type;
 	private String startSymbol;
 	private Set<String> nonTerminalSet=new HashSet<String>();//非终结符集
 	private Set<String> terminalSet=new HashSet<String>();//终结符集
-	private Set ruleSet=new HashSet();//规则集
-	private HashMap<String,HashSet> ruleMapStartWithlhs=new HashMap<String,HashSet>();//以左部为key值的规则集map
-    private HashMap<ArrayList<String>,HashSet> ruleMapStartWithrhs=
-    		     new HashMap<ArrayList<String>,HashSet>();//以规则右部为key值的规则集map
+	private Set<RewriteRule> ruleSet=new HashSet<RewriteRule>();//规则集
+	private HashMap<String,HashSet<RewriteRule>> ruleMapStartWithlhs=new HashMap<String,HashSet<RewriteRule>>();//以左部为key值的规则集map
+    private HashMap<ArrayList<String>,HashSet<RewriteRule>> ruleMapStartWithrhs=
+    		     new HashMap<ArrayList<String>,HashSet<RewriteRule>>();//以规则右部为key值的规则集map
 	/*
      * 构造函数,一步创建
      */
     public CFG(Set<String> nonTerminalSet, Set<String> terminalSet,
-			HashMap<String, HashSet> ruleMapStartWithlhs,
-			HashMap<ArrayList<String>,HashSet> ruleMapStartWithrhs) {
-		super();
+			HashMap<String, HashSet<RewriteRule>> ruleMapStartWithlhs,
+			HashMap<ArrayList<String>,HashSet<RewriteRule>> ruleMapStartWithrhs) {
 		this.nonTerminalSet = nonTerminalSet;
 		this.terminalSet = terminalSet;
 		this.ruleMapStartWithlhs = ruleMapStartWithlhs;
@@ -37,17 +34,36 @@ public class CFG {
 	 * 通过一步一步添加rule来实现规则集，终结符/非终结符的更新
 	 */
 	public CFG() {
+		
 	}
-	
+	public boolean IsCNF() {
+		boolean isCNF=true;
+		for(RewriteRule rule:ruleSet) {
+			ArrayList<String> list=rule.getRhs();
+			if(list.size()>=3) {
+				isCNF=false;
+				break;
+			} 
+            if(list.size()==2) {
+            	for(String string: list) {
+            		if(!nonTerminalSet.contains(string)) {
+            			isCNF=false;
+            			break;
+            		}
+            	}
+            }
+            if(list.size()==1) {
+            	if(nonTerminalSet.contains(list.get(0))) {
+            		isCNF=false;
+            		break;
+            	}
+            }
+		}
+		return isCNF;	
+	}
 	/*
 	 * 方法
 	 */
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
 	public String getStartSymbol() {
 		return startSymbol;
 	}
@@ -66,36 +82,34 @@ public class CFG {
 	public void setTerminalSet(Set<String> terminalSet) {
 		this.terminalSet = terminalSet;
 	}
-	public HashMap<String, HashSet> getRuleMapStartWithlhs() {
+	 public HashMap<String, HashSet<RewriteRule>> getRuleMapStartWithlhs() {
 			return ruleMapStartWithlhs;
 		}
-	public void setRuleMapStartWithlhs(HashMap<String, HashSet> ruleMapStartWithlhs) {
+		public void setRuleMapStartWithlhs(HashMap<String, HashSet<RewriteRule>> ruleMapStartWithlhs) {
 			this.ruleMapStartWithlhs = ruleMapStartWithlhs;
 		}
-	public HashMap<ArrayList<String>,HashSet> getRuleMapStartWithrhs() {
+		public HashMap<ArrayList<String>,HashSet<RewriteRule>> getRuleMapStartWithrhs() {
 			return ruleMapStartWithrhs;
 		}
-	public void setRuleMapStartWithrhs(HashMap<ArrayList<String>,HashSet> ruleMapStartWithrhs) {
+		public void setRuleMapStartWithrhs(HashMap<ArrayList<String>,HashSet<RewriteRule>> ruleMapStartWithrhs) {
 			this.ruleMapStartWithrhs = ruleMapStartWithrhs;
 		}
 		/*
 		 * 添加单个规则
 		 */
-	public void add(RewriteRule rule) {
+	public void add(RewriteRule rule) {	
 	  ruleSet.add(rule);
 	  if(ruleMapStartWithlhs.get(rule.getLhs())!=null) {
-		  if(!ruleMapStartWithlhs.get(rule.getLhs()).contains(rule)) {
-			  ruleMapStartWithlhs.get(rule.getLhs()).add(rule);
-		  }  
+		  ruleMapStartWithlhs.get(rule.getLhs()).add(rule);
   	  }else {
-		 HashSet set=new HashSet();
+		 HashSet<RewriteRule> set=new HashSet<RewriteRule>();
 		 set.add(rule);
 		 ruleMapStartWithlhs.put(rule.getLhs(),set);
   	  }
 	  if(ruleMapStartWithrhs.keySet().contains(rule.getRhs())) {
 		  ruleMapStartWithrhs.get(rule.getRhs()).add(rule); 
 	  }else {
-		  HashSet set=new  HashSet();
+		  HashSet<RewriteRule> set=new  HashSet<RewriteRule>();
 		  set.add(rule);
 		  ruleMapStartWithrhs.put(rule.getRhs(), set);
 	  }
@@ -103,7 +117,7 @@ public class CFG {
 	/*
 	 * 得到规则集
 	 */
-	public Set getRuleSet() {
+	public Set<RewriteRule> getRuleSet() {
 		return ruleSet;
 	}
 	/*
@@ -119,14 +133,14 @@ public class CFG {
 	/*
 	 * 根据规则左部得到所有对应规则
 	 */
-	public Set getRuleBylhs(String lhs){
+	public Set<RewriteRule> getRuleBylhs(String lhs){
 		return ruleMapStartWithlhs.get(lhs);	
 	}
 	/*
 	 * 根据规则右部得到所有对应规则
 	 */
-	public Set getRuleByrhs(String ...args){
-		Vector<String> rhsVector=new Vector<String>();
+	public Set<RewriteRule> getRuleByrhs(String ...args){
+		ArrayList<String> rhsVector=new ArrayList<String>();
 		for(String string : args) {
 			rhsVector.add(string);
 		}
@@ -164,7 +178,7 @@ public class CFG {
 		stb.append("规则集： "+'\n');
 		Set<String> set=ruleMapStartWithlhs.keySet();
 		for(String string : set) {
-			HashSet ruleSet=ruleMapStartWithlhs.get(string);
+			HashSet<RewriteRule> ruleSet=ruleMapStartWithlhs.get(string);
 			Iterator itr3=ruleSet.iterator();
 			while(itr3.hasNext()) {
 				stb.append(itr3.next()+" ");

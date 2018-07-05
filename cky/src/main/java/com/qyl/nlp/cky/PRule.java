@@ -1,7 +1,5 @@
 package com.qyl.nlp.cky;
 
-
-
 public class PRule extends RewriteRule {
     private double proOfRule;
     public PRule() {
@@ -21,6 +19,28 @@ public class PRule extends RewriteRule {
 	
 	public void setProOfRule(double proOfRule) {
 		this.proOfRule = proOfRule;
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		long temp;
+		temp = Double.doubleToLongBits(proOfRule);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PRule other = (PRule) obj;
+		if (Double.doubleToLongBits(proOfRule) != Double.doubleToLongBits(other.proOfRule))
+			return false;
+		return true;
 	}
 	@Override
 	public String toString() {

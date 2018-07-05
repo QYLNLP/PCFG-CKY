@@ -14,15 +14,27 @@ public class Extract {
     	 this.enCoding=enCoding;
      }
      public CFG getCFG() throws UnsupportedOperationException, FileNotFoundException, IOException {
-        return eg.getGrammar(fileName, enCoding,"CFG");
+         eg.CreateGrammar(fileName, enCoding,"CFG");
+         return eg.getGrammar();
      }
-     public CFG getPCFG() throws UnsupportedOperationException, FileNotFoundException, IOException { 
-		return eg.getGrammar(fileName,enCoding,"PCFG"); 
+     public PCFG getPCFG() throws UnsupportedOperationException, FileNotFoundException, IOException { 
+    	 if(eg.getGrammar()!=null&&!eg.getGrammar().IsCNF()) {
+    		 eg.CreatePGrammar();
+    	 }else {
+    	     eg.CreateGrammar(fileName,enCoding,"PCFG");
+    	 }
+		return eg.getPGrammar();
      }
      public CFG getCNF() throws UnsupportedOperationException, FileNotFoundException, IOException {
-    	 return eg.getGrammar(fileName, enCoding, "CNF");
+    	 eg.CreateGrammar(fileName, enCoding, "CNF");
+    	 return eg.getGrammar();
      }
-     public CFG getPCNF() throws UnsupportedOperationException, FileNotFoundException, IOException {    	 
-    	 return eg.getGrammar(fileName, enCoding, "PCNF");
+     public PCFG getPCNF() throws UnsupportedOperationException, FileNotFoundException, IOException {    	 
+    	 if(eg.getGrammar()!=null&eg.getGrammar().IsCNF()) {
+    		 eg.CreatePGrammar();
+    	 }else {
+    	     eg.CreateGrammar(fileName,enCoding,"PCNF");
+    	 }
+    	 return  eg.getPGrammar();
      }
 }
